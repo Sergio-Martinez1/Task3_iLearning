@@ -16,18 +16,6 @@ async function askQuestion(query) {
   })
 }
 
-async function main(menu) {
-  let exit = false;
-
-  while (!exit) {
-    menu.printMenu();
-    let move = await askQuestion("Enter your move:");
-    exit = await menu.selectMenuOption(move);
-  }
-}
-
-
-
 class HMACTool {
   createHmacKey(size) {
     const key = randomBytes(size).toString('hex');
@@ -97,14 +85,15 @@ class CliTable {
 }
 
 class Menu {
-  constructor(moves, hmacKey, hmac, computer_selection) {
+  constructor() {
+  }
+
+  printMenu(moves, hmacKey, hmac, computer_selection) {
     this.moves = moves;
     this.hmacKey = hmacKey;
     this.hmac = hmac;
     this.computer_selection = computer_selection;
-  }
 
-  printMenu() {
     process.stdout.write('\x1Bc');
     console.log("Beat the computer to win!\n")
     console.log("How does it work?\n")
@@ -149,12 +138,22 @@ class Menu {
   }
 }
 
+async function main(menu) {
+  let exit = false;
+
+  while (!exit) {
+    const computer_selection = Math.floor(Math.random() * moves.length);
+    const hmacTool = new HMACTool();
+    const key = hmacTool.createHmacKey(32);
+    const hmac = hmacTool.createHmac(moves[computer_selection], key);
+    menu.printMenu(moves, key, hmac, computer_selection);
+    let move = await askQuestion("Enter your move:");
+    exit = await menu.selectMenuOption(move);
+  }
+}
+
 argv.splice(0, 2);
 const moves = argv;
-const computer_selection = Math.floor(Math.random() * moves.length);
-const hmacTool = new HMACTool();
-const key = hmacTool.createHmacKey(32);
-const hmac = hmacTool.createHmac(moves[computer_selection], key);
 let repeated = false;
 moves.forEach((move, index) => {
   if (moves.indexOf(move) !== index) {
@@ -169,7 +168,7 @@ if (moves.length < 3) {
 } else if (repeated) {
   console.log("Please don't repeat options...")
 } else {
-  const menu = new Menu(moves, key, hmac, computer_selection);
+  const menu = new Menu();
   main(menu);
 }
 
