@@ -162,7 +162,7 @@ moves.forEach((move, index) => {
 })
 
 if (moves.length < 3) {
-  console.log("Please put more at least 3 options...")
+  console.log("Please put at least 3 options...")
 } else if (moves.length % 2 == 0) {
   console.log("Please put an odd number of options...")
 } else if (repeated) {
